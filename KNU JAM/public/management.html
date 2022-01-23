@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KNU JAM</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="shortcut icon" href="#">
+  <link rel="stylesheet" href="style.css">
+  
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">KNU JAM</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="management.html" id = "management">Management</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="my_studyroom.html" id = "mystudyroom">My study room</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="find_studyroom.html" id = "studyroom">Find study</a>
+          </li>
+          &nbsp;
+          <li class="nav-item5">
+            <li class='nav-item4'></li><a class="nav-link" href="./login.html" id = "login">login</a></li>
+            <li class='nav-item4'></li><a class="nav-link" onclick = 'logout_func()' id = "logout" style="cursor: pointer;">logout</a></li>
+            <li class='nav-item4'></li><a class="nav-link" href="register_membership.html" id = "register">Register</a></li>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div style="text-align: center; margin: 30px;">apply list</div>
+  <div class = "center_"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-storage.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script>
+    var firebaseConfig = 
+    {
+      apiKey: "AIzaSyABJkt7uGrInlxQ0fRaG9wraI6qbRCf2nQ",
+      authDomain: "test3-a34b5.firebaseapp.com",
+      projectId: "test3-a34b5",
+      storageBucket: "test3-a34b5.appspot.com",
+      messagingSenderId: "388069458005",
+      appId: "1:388069458005:web:9c9a45e9459adf7bf0d4dc"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <script>
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        var myuid = JSON.parse( localStorage.getItem('user') ).user.uid; 
+        firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            document.getElementById("login").style = "display : none";
+            document.getElementById("register").style = "display : none";
+            db.collection('room').get().then((result) => 
+            {
+              result.forEach((doc) => {
+                if(myuid == doc.data().uid)
+                {
+                    var arr = doc.data().waiting_Array
+                    console.log("here : " + arr)
+                    for (var i = 0; i < arr.length; i++) 
+                    {
+                        var sarr = arr[i].split(',');
+                        $(".center_").before(
+                            `<div class='containermt-3'> 
+                                <div class='product'>
+                                    <div class='flex-grow-1 p-4'>
+                                        <h1 class='title'>${doc.data().제목}</h1>
+                                        <p class='date' style = "color : indigo;">신청인 : ${sarr[1]}</p>
+                                        <div align='right'>
+                                          <div class='wrap'>
+                                            <button class='button' id = "${i},${doc.id}" onclick="permit_func(this.id)">허가</button>
+                                          </div></p>
+                                        </div>
+                                    </div> 
+                                </div>
+                             </div>`);
+                     }
+                }
+              })
+            })
+        } else {
+            $(".center_").append("<div class='containermt-3'><h3>로그인 해주세요.</h3></div>");
+            document.getElementById("login").style = "display : block";
+            document.getElementById("register").style = "display : block";
+            document.getElementById("logout").style = "display : none";
+            document.getElementById("management").style = "display : none";
+            document.getElementById("mystudyroom").style = "display : none";
+            document.getElementById("studyroom").style = "display : none";
+            
+        }
+    });
+
+    function permit_func(ary)
+    {
+        split_ary = ary.split(',');
+        db.collection('room').get().then((결과) => 
+        {
+          결과.forEach((doc) => 
+          {
+              if(doc.id === split_ary[1])
+              {
+                  var temp = doc.data().who
+                  var temp2 = doc.data().waiting_Array
+                  var push_data = temp2[Number(split_ary[0])].split(',')
+                  //console.log(temp2, split_ary[0])
+                  temp.push(push_data[0])
+                  temp2.splice(Number(split_ary[0]),1);
+                  //console.log("허가성공 : ", temp2)
+                  db.collection('room').doc(doc.id).update({ who : temp })
+                  db.collection('room').doc(doc.id).update({ waiting_Array : temp2 }).then((t) => 
+                  {
+                      alert("허가되었습니다.");
+                      window.location.reload();
+                      return false;    
+                  })
+              }
+          })
+        })
+    }
+
+    function logout_func() 
+    {
+        localStorage.removeItem('user')
+        firebase.auth().signOut();
+        window.location.href = './index.html'
+    }
+
+  </script>
+</body>
+
+
+</html>

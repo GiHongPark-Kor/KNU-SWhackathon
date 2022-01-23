@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KNU JAM</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="shortcut icon" href="#">
+  <link rel="stylesheet" href="style.css">
+
+
+  <style>
+
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">KNU JAM</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="management.html" id = "management">Management</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="my_studyroom.html" id = "mystudyroom">My study room</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="find_studyroom.html" id = "studyroom">Find study</a>
+          </li>
+          &nbsp;
+          <li class="nav-item5">
+            <li class='nav-item4'></li><a class="nav-link" href="./login.html" id = "login">login</a></li>
+            <li class='nav-item4'></li><a class="nav-link" onclick = 'logout_func()' id = "logout" style="cursor: pointer;">logout</a></li>
+            <li class='nav-item4'></li><a class="nav-link" href="register_membership.html" id = "register">Register</a></li>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+    <div class="wrap_2">
+      <ul>
+        <li><button id="btn1">문제 제출</button>
+          <ul>
+            <li>
+              <button id="btn4">주관식</button>
+            </li>
+            <li>
+              <button id="btn5">객관식</button>
+            </li>
+          </ul>
+        </li><br>
+        <li><button id="btn2">스터디<br>시험</button></li><br>
+        <li><button id="btn3">모의고사</button></li>
+      </ul>
+    </div>
+
+    <div class="left">
+        <div class="container p-4 detail">
+            <div class="row">
+              <div class="col-3 p-0">
+                <ul class="list-group chat-list" id = "chat-list-content">
+                </ul>
+              </div>
+              <div class="col-9 p-0" style="background-color:white">
+                <div class="chat-room"><p style="text-align: center;">채팅창</p>
+                  <ul class="list-group chat-content">
+                  </ul>
+                  <div class="input-group" style="background-color: white;">
+                    <input class="form-control" id="chat-input">
+                    <div class="form-check" style="margin: 10px;">
+                      <input class="form-check-input" type="checkbox" value="" id="checkbox1">
+                      <label class="form-check-label" for="checkbox1"> 
+                         익명 
+                      </label>
+                    </div>
+                    <button class="btn btn-secondary" id="send">전송</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+         </div> 
+    </div>
+
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-storage.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script>
+      var firebaseConfig = {
+        apiKey: "AIzaSyABJkt7uGrInlxQ0fRaG9wraI6qbRCf2nQ",
+        authDomain: "test3-a34b5.firebaseapp.com",
+        projectId: "test3-a34b5",
+        storageBucket: "test3-a34b5.appspot.com",
+        messagingSenderId: "388069458005",
+        appId: "1:388069458005:web:9c9a45e9459adf7bf0d4dc"
+      };
+      firebase.initializeApp(firebaseConfig);
+    </script>
+
+  <script>
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        //alert("로그인중")
+        document.getElementById("login").style = "display : none";
+        document.getElementById("register").style = "display : none";
+      } else {
+        //alert("로그인x")
+        document.getElementById("login").style = "display : block";
+        document.getElementById("register").style = "display : block";
+        document.getElementById("logout").style = "display : none";
+        document.getElementById("management").style = "display : none";
+        document.getElementById("mystudyroom").style = "display : none";
+        document.getElementById("studyroom").style = "display : none";
+      }
+    });
+
+    var myuid = JSON.parse( localStorage.getItem('user') ).user.uid
+    var myname = JSON.parse( localStorage.getItem('user') ).user.displayName
+    var chatroom_id;
+    var cur_room_id
+  
+    db.collection('room').where('who', 'array-contains', myuid).get().then((result)=>{
+        result.forEach((a)=>{
+          //console.log(a.id)
+            var template = `<li style = "cursor: pointer;" class="list-group-item" id = "chatrooms${a.id}">
+                    <h6 style = "font-size:15px; padding-top: 15px; padding-bottom : 15px;">${a.data().제목}</h6>
+                    <h6 class="text-small" style = "display : none;">${a.id},${a.data().교과목코드}</h6>
+                </li>`
+            $('.chat-list').append(template)
+
+            $('.list-group-item').click(function (e) {
+                chatroom_id = $(this).children('.text-small').text().split(',');
+                cur_room_id = chatroom_id
+                e.stopImmediatePropagation();
+                //console.log(chatroom_id)
+                db.collection('room').doc(chatroom_id[0]).collection('messages').orderBy('date').onSnapshot((res)=>{
+                    $('.chat-content').html('');
+                    res.forEach((b)=>{
+                      var template
+                        if(b.data().uid == myuid)
+                        {
+                          template = `<li><span class="chat-box" style = "float : right; background: rgba(155, 90, 230, 0.151); ">[${b.data().name}] : ${b.data().content}</span></li>`;
+                        }else
+                        {
+                          template = `<li><span class="chat-box" style = "float : left; background : rgba(255, 221, 72, 0.288);">[${b.data().name}] : ${b.data().content}</span></li>`;
+                        }
+                        $('.chat-content').append(template)
+                    })
+                  })
+                  db.collection('room').where('who', 'array-contains', myuid).get().then((result2)=>{
+                  result.forEach((idx)=>{
+                  document.getElementById('chatrooms'+idx.id).style.background = "white";
+                  })
+                  console.log('chatrooms'+cur_room_id[0])
+                  document.getElementById('chatrooms'+cur_room_id[0]).style.background = "gainsboro";
+                  })  
+          
+            })
+        })
+    })
+
+    $('#send').click(function(){
+      var name_value;
+      if(document.getElementById('checkbox1').checked)
+        name_value = "익명"
+      else
+        name_value = myname
+
+        var 데이터 = {
+            content : $('#chat-input').val(),
+            date : new Date(),
+            uid : myuid,
+            name : name_value
+        }
+        db.collection('room').doc(chatroom_id[0]).collection('messages').add(데이터)
+    })
+
+
+    function logout_func() {
+      firebase.auth().signOut();
+      window.location.href = './index.html'
+    }
+
+    $('#btn4').click(function(){
+      window.location.href = './upload_sub.html?id='+ cur_room_id
+    })
+
+    $('#btn5').click(function(){
+      window.location.href = './upload_mc.html?id='+ cur_room_id
+    })
+
+    $('#btn2').click(function(){
+      window.location.href = './bring_studyroom_test.html?id='+ cur_room_id
+    })
+
+    $('#btn3').click(function(){
+      window.location.href = './bring_mock_test.html?id='+ cur_room_id
+    })
+
+  </script>
+</body>
+
+</html>

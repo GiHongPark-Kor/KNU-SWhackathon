@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KNU JAM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="index.html">KNU JAM</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="management.html" id = "management">Management</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="my_studyroom.html" id = "mystudyroom">My study room</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="find_studyroom.html" id = "studyroom">Find study</a>
+            </li>
+            &nbsp;
+            <li class="nav-item5">
+              <li class='nav-item4'></li><a class="nav-link" href="./login.html" id = "login">login</a></li>
+              <li class='nav-item4'></li><a class="nav-link" onclick = 'logout_func()' id = "logout" style="cursor: pointer;">logout</a></li>
+              <li class='nav-item4'></li><a class="nav-link" href="register_membership.html" id = "register">Register</a></li>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class = "error_display"></div>
+    <div class="container mt-3">
+        <br>문제</br>
+        <textarea class="form-control mt-2" id="problem" placeholder="problem" autocomplete="off"></textarea>
+        <input type="text" class="form-control mt-2" id="answer" placeholder="answer" autocomplete="off">
+        <br>
+        보기 입력</br>
+        1.<input type="text" class="form-control mt-2" id="ex1" placeholder="ex1" autocomplete="off">
+        2.<input type="text" class="form-control mt-2" id="ex2" placeholder="ex2" autocomplete="off">
+        3.<input type="text" class="form-control mt-2" id="ex3" placeholder="ex3" autocomplete="off">
+        4.<input type="text" class="form-control mt-2" id="ex4" placeholder="ex4" autocomplete="off">
+        <textarea class="form-control mt-2" id="content" placeholder="problem commentary" autocomplete="off"></textarea>
+        <button class="button" id="send" >문제 제출</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-storage.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyABJkt7uGrInlxQ0fRaG9wraI6qbRCf2nQ",
+            authDomain: "test3-a34b5.firebaseapp.com",
+            projectId: "test3-a34b5",
+            storageBucket: "test3-a34b5.appspot.com",
+            messagingSenderId: "388069458005",
+            appId: "1:388069458005:web:9c9a45e9459adf7bf0d4dc"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <script>
+        const db = firebase.firestore(); 
+        const storage = firebase.storage();
+        var 내uid = JSON.parse( localStorage.getItem('user')).user.uid
+        var 쿼리스트링 = new URLSearchParams(window.location.search)
+        var 채팅방id
+        var 과목코드
+
+        if(쿼리스트링.get('id') == "undefined")
+        {
+            $(".error_display").append("<div class='containermt-3'><h3>뒤로가서 채팅방 클릭 후 문제제출 해주세요.</h3></div>");
+        }else
+        {
+             temp = 쿼리스트링.get('id').split(',')
+             채팅방id = temp[0]
+             과목코드 = temp[1]
+        }
+
+     firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+          //alert("로그인중")
+          document.getElementById("login").style = "display : none";
+          document.getElementById("register").style = "display : none";
+          $('#send').click(function () 
+          {
+            var 저장할거 = 
+            {
+                문제 : $('#problem').val(),
+                답: $('#answer').val(),
+                보기1: $('#ex1').val(),
+                보기2: $('#ex2').val(),
+                보기3: $('#ex3').val(),
+                보기4: $('#ex4').val(),
+                풀이 : $('#content').val(),
+                날짜: new Date(),
+                유저: firebase.auth().currentUser.email,
+                채팅방: 채팅방id,
+                교과목코드 : 과목코드
+            }
+
+            db.collection('room').doc(채팅방id).collection('problems_mc').add(저장할거).then((result) => 
+            {
+              db.collection('Problem_mc').add(저장할거).then((result) =>
+              {
+                    alert("문제 제출 완료");
+                    window.location.href = './my_studyroom.html'
+              })              
+            }).catch((error) => 
+            {
+                consloe.log(err)
+            })
+        });
+      } else {
+          //alert("로그인x")
+          document.getElementById("login").style = "display : block";
+          document.getElementById("register").style = "display : block";
+          document.getElementById("logout").style = "display : none";
+          document.getElementById("management").style = "display : none";
+          document.getElementById("mystudyroom").style = "display : none";
+          document.getElementById("studyroom").style = "display : none";
+      }
+  });
+
+  function logout_func() 
+  {
+      firebase.auth().signOut();
+      window.location.href = './index.html'
+  }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KNU JAM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="index.html">KNU JAM</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="index.html">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="management.html" id = "management">Management</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="my_studyroom.html" id = "mystudyroom">My study room</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="find_studyroom.html" id = "studyroom">Find study</a>
+              </li>
+              &nbsp;
+              <li class="nav-item5">
+                <li class='nav-item4'></li><a class="nav-link" href="./login.html" id = "login">login</a></li>
+                <li class='nav-item4'></li><a class="nav-link" onclick = 'logout_func()' id = "logout" style="cursor: pointer;">logout</a></li>
+                <li class='nav-item4'></li><a class="nav-link" href="register_membership.html" id = "register">Register</a></li>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    <div class = "center_"></div>
+
+    <div class="container mt-3"></div>
+
+
+        <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-storage.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script>
+            var firebaseConfig = {
+                apiKey: "AIzaSyABJkt7uGrInlxQ0fRaG9wraI6qbRCf2nQ",
+                authDomain: "test3-a34b5.firebaseapp.com",
+                projectId: "test3-a34b5",
+                storageBucket: "test3-a34b5.appspot.com",
+                messagingSenderId: "388069458005",
+                appId: "1:388069458005:web:9c9a45e9459adf7bf0d4dc"
+            };
+            firebase.initializeApp(firebaseConfig);
+        </script>
+        <p align="middle">
+            <input type="button" class="button" value="정답 제출" id="submit">
+        </p>
+        <script>
+            const db = firebase.firestore();
+            var myuid = JSON.parse( localStorage.getItem('user')).user.uid
+            var Qstring = new URLSearchParams(window.location.search)
+            var chatroom_id
+            var subject_code
+            firebase.auth().onAuthStateChanged((user) => 
+            {
+                if (user) {
+                    //alert("로그인중")
+                    document.getElementById("login").style = "display : none";
+                    document.getElementById("register").style = "display : none";
+                } else {
+                    //alert("로그인x")
+                    document.getElementById("login").style = "display : block";
+                    document.getElementById("register").style = "display : block";
+                    document.getElementById("logout").style = "display : none";
+                    document.getElementById("management").style = "display : none";
+                    document.getElementById("mystudyroom").style = "display : none";
+                    document.getElementById("studyroom").style = "display : none";
+                }
+            });
+
+            if(Qstring.get('id') == "undefined")
+            {
+                $(".center_").append("<div class='containermt-3'><h3>뒤로가서 채팅방 클릭 후 시험 부탁드립니다.</h3></div>");
+            }else
+            {  
+                temp = Qstring.get('id').split(',')
+                chatroom_id = temp[0]
+                subject_code = temp[1]
+                db.collection('room').doc(chatroom_id).collection('problems_sub').get().then((result) => 
+                {
+                    var size
+                    var ary = new Array(); // num
+                    var ary3 = new Array(); // content
+                    var ary4 = new Array(); // Commentary
+                    var ary2 = new Array(); // 제출유저
+                    
+                    size = result.size // will return the collection size
+                    var cnt = 0;
+                    result.forEach((doc) => 
+                    {
+                        console.log(cnt);
+                        ary.push(doc.data().정답);
+                        ary2.push(doc.data().유저);
+                        ary3.push(doc.data().내용);
+                        ary4.push(doc.data().해설);
+                        
+                        var template = `<div class="room">
+                        <div class="thumbnail" style="background-image: url('https://via.placeholder.com/350')"></div>
+                        <div class="flex-grow-1 p-4">
+                            <h5 class="title">문제 : ${doc.data().내용}</h5>
+                            <p><input style="width:450px;" id=${String(cnt++)} type="text" class="answer" placeholder="정답입력"></p>
+                        </div>
+                        </div>`;
+                        $('.container').append(template)
+                    })
+
+                    db.collection('room').doc(chatroom_id).collection('problems_mc').get().then((result2) => 
+                    {
+                        var size2
+                        var ary5 = new Array(); // 정답
+                        var ary6 = new Array(); // 보기1
+                        var ary7 = new Array(); // 보기2
+                        var ary8 = new Array(); // 보기3
+                        var ary9 = new Array(); // 보기4
+                        var ary10 = new Array(); // 풀이
+                        var ary11 = new Array(); // 문제
+                        var ary12 = new Array(); // 유저 
+                        size2 = result2.size // will return the collection size
+                        console.log("size2 : " +size2)
+                        var cnt = 0;
+                        result2.forEach((doc) => 
+                        {
+                            // console.log(cnt);
+                            ary5.push(doc.data().답);
+                            ary6.push(doc.data().보기1);
+                            ary7.push(doc.data().보기2);
+                            ary8.push(doc.data().보기3);
+                            ary9.push(doc.data().보기4);
+                            ary10.push(doc.data().풀이);
+                            ary11.push(doc.data().문제);
+                            ary12.push(doc.data().유저);
+                            console.log(doc.data().유저);
+                            var template = `<div class="room">
+                            <div class="thumbnail" style="background-image: url('https://via.placeholder.com/350')"></div>
+                            <div class="flex-grow-1 p-4">
+                                <h5 class="title" >문제 : ${doc.data().문제}</h5>
+                                <input type="radio" name=${String(cnt)} value="1">${doc.data().보기1}<br>
+                                <input type="radio" name=${String(cnt)} value="2">${doc.data().보기2}<br>
+                                <input type="radio" name=${String(cnt)} value="3"}>${doc.data().보기3}<br>
+                                <input type="radio" name=${String(cnt++)} value="4">${doc.data().보기4}<br> 
+                            </div>
+                            </div>`;
+                            $('.container').append(template)
+                        })
+                        $('#submit').click(function () 
+                        {
+                            var i;
+                            for (i = 0; i < size; i++) 
+                            {
+                                console.log($('#' + String(i)).val());
+                                var temp = $("#" + String(i)).val();
+                                var save_object = {
+                                    문제번호: i,
+                                    내용: ary3[i],
+                                    정답: ary[i],
+                                    해설: ary4[i],
+                                    유저정답: temp,
+                                    날짜: new Date(),
+                                    유저:ary2[i],
+                                    테스트유저: myuid,
+                                    교과목코드 : subject_code
+                                }
+                                db.collection('room').doc(chatroom_id).collection('answers_sub').add(save_object).then((result) => 
+                                {
+                                    console.log("성공")
+                                }).catch((error) => {
+                                    console.error('실패사유는', error);
+                                })
+
+                            }
+
+                            var j;
+                            for (j = 0; j < size2; j++) 
+                            {
+                                var temp;
+                                const getElementList = document.getElementsByName(String(j));
+                                
+                                getElementList.forEach((node) => {
+                                    if(node.checked)  {
+                                    temp = node.value;
+                                        console.log(temp);
+                                    }
+                                }) 
+                                console.log(temp)
+                                var save_object = {
+                                    문제: ary11[j],
+                                    보기1: ary6[j],
+                                    보기2: ary7[j],
+                                    보기3: ary8[j],
+                                    보기4: ary9[j],
+                                    답: ary5[j],
+                                    풀이: ary10[j],
+                                    날짜: new Date(),
+                                    테스트유저: myuid,
+                                    유저: ary12[j],
+                                    유저정답:temp,
+                                    교과목코드 : subject_code
+                                }
+                                db.collection('room').doc(chatroom_id).collection('answers_mc').add(save_object).then((result) => 
+                                {
+                                    window.location.href = './grade_studyroom_test.html?id=' + Qstring.get('id')
+                                    console.log("성공")
+                                }).catch((error) => 
+                                {
+                                    console.error('실패사유는', error);
+                                })
+
+                            }
+                        });
+                    })
+                })
+            }
+
+            function logout_func() 
+            {
+                localStorage.removeItem('user')
+                firebase.auth().signOut();
+                window.location.href = './index.html'
+            }
+
+    </script>
+   
+</body>
+</html>
